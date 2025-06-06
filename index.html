@@ -3,161 +3,278 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>StickyPicky - Custom Stickers</title>
+  <title>StickyPicky</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #111;
-      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      background: #fff8f0;
+      color: #333;
     }
     header {
-      background: #ff4081;
-      padding: 20px;
+      background: #ffd1dc;
+      padding: 15px;
       text-align: center;
+      border-bottom: 2px dashed #ff80ab;
+    }
+    header img {
+      width: 100px;
+      height: auto;
+      display: block;
+      margin: 0 auto 5px;
     }
     header h1 {
       margin: 0;
-      font-size: 2em;
+      color: #d5006e;
     }
-    section {
-      padding: 20px;
+    .products-wrapper {
+      max-height: 320px;
+      overflow-y: auto;
+      margin: 10px 0;
     }
     .products {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      padding: 10px 20px;
     }
     .product {
-      background: #222;
-      padding: 15px;
-      border-radius: 12px;
+      background: #fff;
+      border-radius: 16px;
       text-align: center;
+      padding: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      position: relative;
     }
     .product img {
       width: 100%;
-      height: 120px;
+      height: 100px;
       object-fit: contain;
-      border-radius: 8px;
+      border-radius: 10px;
     }
-    button {
-      background: #ff4081;
-      color: #fff;
+    .sold-out {
+      filter: grayscale(100%);
+    }
+    .product button {
+      margin-top: 8px;
+      padding: 6px 12px;
+      background: #ff80ab;
+      color: white;
       border: none;
-      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .cart-section, .upload-section {
+      padding: 20px;
+      background: #fff0f5;
+      margin: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+    .checkout-btn {
+      background: #f06292;
+      color: white;
+      padding: 12px;
+      width: 100%;
+      border: none;
       border-radius: 8px;
       cursor: pointer;
       margin-top: 10px;
     }
-    #cart {
-      margin-top: 20px;
-      background: #1e1e1e;
-      padding: 15px;
-      border-radius: 12px;
-    }
-    #uploadForm {
-      margin-top: 20px;
-      background: #1a1a1a;
-      padding: 15px;
-      border-radius: 12px;
-    }
     input, textarea {
       width: 100%;
-      padding: 10px;
       margin: 8px 0;
+      padding: 10px;
+      border: 1px dashed #ff80ab;
       border-radius: 8px;
+      font-family: inherit;
+    }
+    #adminPanel {
+      display: none;
+      padding: 20px;
+      background: #ffe4ec;
+      margin: 20px;
+      border-radius: 10px;
+    }
+    #adminPanel h3 {
+      margin-top: 0;
+    }
+    .admin-btn {
+      margin-top: 10px;
+      background: #ec407a;
+      padding: 10px;
       border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>StickyPicky</h1>
-    <p>Custom Stickers That Speak Your Style!</p>
-  </header>
+<header ondblclick="enterAdminCode()">
+  <!-- 🌻 New Logo Image -->
+  <img src="stickypicky-logo.png" alt="StickyPicky Logo">
+  <h1>StickyPicky 💖</h1>
+</header>
 
-  <section>
-    <h2>Our Stickers</h2>
-    <div class="products">
-      <div class="product">
-        <img src="https://via.placeholder.com/150?text=Sticker+1" alt="Sticker 1" />
-        <p>Cool Skull</p>
-        <p>₹49</p>
-        <button onclick="addToCart('Cool Skull', 49)">Add to Cart</button>
-      </div>
-      <div class="product">
-        <img src="https://via.placeholder.com/150?text=Sticker+2" alt="Sticker 2" />
-        <p>Rocket Vibes</p>
-        <p>₹59</p>
-        <button onclick="addToCart('Rocket Vibes', 59)">Add to Cart</button>
-      </div>
-      <div class="product">
-        <img src="https://via.placeholder.com/150?text=Sticker+3" alt="Sticker 3" />
-        <p>Funny Cat</p>
-        <p>₹39</p>
-        <button onclick="addToCart('Funny Cat', 39)">Add to Cart</button>
-      </div>
-    </div>
-  </section>
+<div class="products-wrapper">
+  <div class="products" id="productList"></div>
+</div>
 
-  <section id="cart">
-    <h2>Your Cart</h2>
-    <ul id="cartItems"></ul>
-    <p><strong>Total:</strong> ₹<span id="total">0</span></p>
-  </section>
+<section class="cart-section">
+  <h2>🛒 Cart</h2>
+  <ul id="cartItems"></ul>
+  <p><strong>Total:</strong> ₹<span id="total">0</span></p>
+  <button class="checkout-btn" onclick="checkout()">Checkout via WhatsApp</button>
+</section>
 
-  <section id="uploadForm">
-    <h2>Upload Your Design</h2>
-    <form onsubmit="event.preventDefault(); uploadSticker();">
-      <label>Your Name:</label>
-      <input type="text" id="uname" required />
-      <label>Your Design (Image):</label>
-      <input type="file" id="uploadFile" accept="image/*" required />
-      <label>Description or Notes:</label>
-      <textarea id="notes" rows="3" placeholder="Tell us about your idea..."></textarea>
-      <button type="submit">Submit Design</button>
-    </form>
-    <p id="uploadStatus" style="margin-top: 10px; color: lightgreen;"></p>
-  </section>
+<section class="upload-section">
+  <h2>🎨 Upload Your Design</h2>
+  <form onsubmit="event.preventDefault(); uploadCustomSticker();">
+    <input type="text" id="uname" placeholder="Your Name" required />
+    <input type="file" id="uploadFile" accept="image/*" required />
+    <textarea id="notes" rows="3" placeholder="Tell us about your idea..."></textarea>
+    <button class="checkout-btn">Submit Design</button>
+    <p id="uploadStatus" style="color: green;"></p>
+  </form>
+</section>
 
-  <script>
-    let cart = [];
-    function addToCart(item, price) {
-      cart.push({ item, price });
-      renderCart();
+<div id="adminPanel">
+  <h3>Admin Panel</h3>
+  <input type="text" id="adminStickerName" placeholder="Sticker Name">
+  <input type="number" id="adminStickerPrice" placeholder="Price">
+  <input type="file" id="adminStickerImage" accept="image/*">
+  <button class="admin-btn" onclick="addSticker()">Add Sticker</button>
+  <br/><br/>
+  <h4>Manage Stickers</h4>
+  <div id="adminStickerList"></div>
+  <button class="admin-btn" onclick="hideAdmin()">Hide Admin Panel</button>
+</div>
+
+<script>
+  let cart = [];
+  let stickers = JSON.parse(localStorage.getItem("stickers") || "[]");
+  const adminCode = "Aman99";
+  const phone = "9547695016";
+
+  function saveStickers() {
+    localStorage.setItem("stickers", JSON.stringify(stickers));
+  }
+
+  function renderProducts() {
+    const productList = document.getElementById("productList");
+    productList.innerHTML = "";
+    stickers.forEach((s, i) => {
+      const div = document.createElement("div");
+      div.className = "product";
+      div.innerHTML = `
+        <img src="${s.image}" class="${s.sold ? 'sold-out' : ''}">
+        <p><strong>${s.name}</strong></p>
+        <p>₹${s.price}</p>
+        ${s.sold ? `<p><strong>Sold Out</strong></p>` :
+        `<button onclick="addToCart(${i})">Add to Cart</button>`}
+      `;
+      productList.appendChild(div);
+    });
+    renderAdminList();
+  }
+
+  function addToCart(i) {
+    const s = stickers[i];
+    const existing = cart.find(c => c.name === s.name);
+    if (existing) existing.qty++;
+    else cart.push({ name: s.name, price: s.price, qty: 1 });
+    renderCart();
+  }
+
+  function renderCart() {
+    const list = document.getElementById("cartItems");
+    list.innerHTML = "";
+    let total = 0;
+    cart.forEach(c => {
+      const li = document.createElement("li");
+      li.textContent = `${c.name} x${c.qty} - ₹${c.price * c.qty}`;
+      list.appendChild(li);
+      total += c.price * c.qty;
+    });
+    document.getElementById("total").textContent = total;
+  }
+
+  function checkout() {
+    if (!cart.length) return alert("Cart is empty!");
+    let msg = "Hi! I want to order:\n";
+    cart.forEach(c => msg += `${c.name} x${c.qty} - ₹${c.qty * c.price}\n`);
+    window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`);
+  }
+
+  function uploadCustomSticker() {
+    const name = document.getElementById("uname").value.trim();
+    const notes = document.getElementById("notes").value.trim();
+    let msg = `Hi, I’m ${name} and I want a custom sticker.\n${notes ? notes : ''}`;
+    window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`);
+    document.getElementById("uploadStatus").textContent = "Opening WhatsApp… Please upload your image manually.";
+  }
+
+  function enterAdminCode() {
+    const code = prompt("Enter Admin Code:");
+    if (code === adminCode) {
+      document.getElementById("adminPanel").style.display = "block";
+    } else {
+      alert("Wrong code.");
     }
+  }
 
-    function renderCart() {
-      const cartList = document.getElementById('cartItems');
-      cartList.innerHTML = '';
-      let total = 0;
-      cart.forEach(c => {
-        const li = document.createElement('li');
-        li.textContent = `${c.item} - ₹${c.price}`;
-        cartList.appendChild(li);
-        total += c.price;
-      });
-      document.getElementById('total').textContent = total;
-    }
+  function hideAdmin() {
+    document.getElementById("adminPanel").style.display = "none";
+  }
 
-    function uploadSticker() {
-      const name = document.getElementById('uname').value.trim();
-      const notes = document.getElementById('notes').value.trim();
-      const phone = "918250757892"; // Your WhatsApp number with country code
+  function addSticker() {
+    const name = document.getElementById("adminStickerName").value;
+    const price = document.getElementById("adminStickerPrice").value;
+    const fileInput = document.getElementById("adminStickerImage");
+    const file = fileInput.files[0];
+    if (!file || !name || !price) return alert("Fill all fields!");
 
-      if (!name) {
-        alert("Please enter your name.");
-        return;
-      }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      stickers.push({ name, price, image: e.target.result, sold: false });
+      saveStickers();
+      renderProducts();
+    };
+    reader.readAsDataURL(file);
+  }
 
-      const message = `Hi, I’m ${name}. I want to order a custom sticker.\n\nNotes: ${notes || "No extra notes"}\n\nI’ll send the image now.`;
-      const whatsappURL = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  function renderAdminList() {
+    const adminList = document.getElementById("adminStickerList");
+    if (!adminList) return;
+    adminList.innerHTML = "";
+    stickers.forEach((s, i) => {
+      const div = document.createElement("div");
+      div.innerHTML = `
+        <p>${s.name} - ₹${s.price}</p>
+        <button onclick="deleteSticker(${i})">Delete</button>
+        <button onclick="toggleSold(${i})">${s.sold ? "Mark as Available" : "Mark as Sold Out"}</button>
+        <hr>
+      `;
+      adminList.appendChild(div);
+    });
+  }
 
-      window.open(whatsappURL, "_blank");
-      document.getElementById('uploadStatus').textContent = `Opening WhatsApp... Please send your image manually.`;
-    }
-  </script>
+  function deleteSticker(i) {
+    stickers.splice(i, 1);
+    saveStickers();
+    renderProducts();
+  }
 
+  function toggleSold(i) {
+    stickers[i].sold = !stickers[i].sold;
+    saveStickers();
+    renderProducts();
+  }
+
+  renderProducts();
+</script>
 </body>
 </html>
